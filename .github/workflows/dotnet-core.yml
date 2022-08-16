@@ -74,6 +74,19 @@ jobs:
         printf "University of Dundee\0Fred Bloggs\0Ninewells Hospital\0person\0woman\0man\0camera\0tv\0" | nc -N 127.0.0.1 1881
         kill $!
         mkdir -p ../../release
+        PREV=`pwd`
+        mkdir -p /tmp/ikvm
+        cd /tmp/ikvm
+        wget -q https://github.com/ikvm-revived/ikvm/releases/download/8.2.1/IKVM-8.2.1-tools-ikvmc-netcoreapp3.1.zip
+        unzip -q IKVM-8.2.1-tools-ikvmc-netcoreapp3.1.zip
+        rm IKVM-8.2.1-tools-ikvmc-netcoreapp3.1.zip
+        cd linux-x64
+        wget -q https://github.com/ikvm-revived/ikvm/releases/download/8.2.1/IKVM-8.2.1-bin-netcoreapp3.1.zip
+        unzip -q IKVM-8.2.1-bin-netcoreapp3.1.zip
+        rm IKVM-8.2.1-bin-netcoreapp3.1.zip
+        dotnet ikvm.dll -out:$PREV/nerdjar.dll -target:library $PREV/target/nerd-0.0.1-SNAPSHOT.jar -nostdlib -r:refs/*.dll
+        cd $PREV
+        dotnet publish -r linux-x64 -o linux --nologo --sc -p:PublishSingleFile=true
         mv target/nerd-0.0.1-SNAPSHOT.jar ../../release/smi-nerd-$(fgrep AssemblyVersion ../../SharedAssemblyInfo.cs | cut -d'"' -f2).jar
     - name: Package ii binary
       run: |
